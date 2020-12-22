@@ -21,5 +21,19 @@ setup:
 password: 
 	STUID=$(STUID) STUNAME=$(STUNAME) bash -c "$$(curl -s https://course.cunok.cn/pa/scripts/password.sh)"
 
+#########################################
+
+submit1: 
+	STUID=$(STUID) STUNAME=$(STUNAME) bash -c "$$(curl -s https://course1.istratus.cn/pa/scripts/submit.sh)"
+
+info1: 
+	STUID=$(STUID) STUNAME=$(STUNAME) bash -c "$$(curl -s https://course1.istratus.cn/pa/scripts/info.sh)"
+
+setup1: 
+	STUID=$(STUID) STUNAME=$(STUNAME) bash -c "$$(curl -s https://course1.istratus.cn/pa/scripts/setup.sh)"
+
+password1: 
+	STUID=$(STUID) STUNAME=$(STUNAME) bash -c "$$(curl -s https://course1.istratus.cn/pa/scripts/password.sh)"
+
 
 .PHONY: default clean submit
