@@ -39,7 +39,7 @@ void cpu_exec(uint64_t n) {
   }
 
   for (; n > 0; n --) {
-    __attribute__((unused)) vaddr_t ori_pc = cpu.pc;
+    __attribute__((unused)) vaddr_t ori_pc = cpu.pc;    // __attribute__((unused)) 告诉编译器忽略未使用静态函数的警告
 
     /* Execute one instruction, including instruction fetch,
      * instruction decode, and the actual execution. */

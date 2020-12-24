@@ -32,6 +32,7 @@ static int cmd_help(char *args);
 static int cmd_c(char *args);
 
 static int cmd_q(char *args);
+
 /* PA1 */
 static void cmd_err(int err_type, const char *command);
 
@@ -53,27 +54,27 @@ static struct {
 
     int (*handler)(char *);
 } cmd_table[] = {
-        {"help", "Display informations about all supported commands", cmd_help},
-        {"c",    "Continue the execution of the program", cmd_c},
-        {"q",    "Exit NEMU", cmd_q},
+        {"help", "Display informations about all supported commands",                                                              cmd_help},
+        {"c",    "Continue the execution of the program",                                                                          cmd_c},
+        {"q",    "Exit NEMU",                                                                                                      cmd_q},
 
         /* TODO: Add more commands */
         /* PA1.1 */
-        {"si",   "Usage: si [N]\n Execute the program with N(default: 1) step", cmd_si},
+        {"si",   "Usage: si [N]\n Execute the program with N(default: 1) step",                                                    cmd_si},
         {"info", "Usage: info [rw]\n"\
   "info r: print the values of all registers\n"\
   "info w: show information about watchpoint", cmd_info},
         {"x",    "Usage: x [N] [EXPR]\n" \
-    "print N(default:1) consecutive 4 bytes starting from address calculated from EXPR", cmd_x},
-        {"p",    "Usage: p EXPR\nPrint the value of expression", cmd_p},
-        {"w",    "Usage: w EXPR\nAdd watchpoint", cmd_w},
-        {"d",    "Usage: d N\nDelete No N watchpoint", cmd_d}
+    "print N(default:1) consecutive 4 bytes starting from address calculated from EXPR",  cmd_x},
+        {"p",    "Usage: p EXPR\nPrint the value of expression",                                                                   cmd_p},
+        {"w",    "Usage: w EXPR\nAdd watchpoint",                                                                                  cmd_w},
+        {"d",    "Usage: d N\nDelete No N watchpoint",                                                                             cmd_d}
 };
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
 
 static int cmd_help(char *args) {
-    /* extract the first argument */
+    /* extract the second token: the first argument */
     char *arg = strtok(NULL, " ");
     int i;
 
@@ -106,24 +107,28 @@ static int cmd_q(char *args) {
 /* PA1.1 */
 
 static int cmd_si(char *args) {
-    /* extract the first argument */
+    /* extract the second token: the first argument */
     char *arg = strtok(NULL, " ");
     if (arg == NULL) {
-        /* no argument given */
+        /* no argument given, set the default N = 1 */
         cpu_exec(1);
     } else {
+        /* judge whether argument is digit */
+        if (strspn(arg, "0123456789") != strlen(arg)) {
+            cmd_err(0, "si: not digit");
+            return 0;
+        }
         int n = atoi(arg);
         if (n > 0)
             cpu_exec(n);
         else
-            cmd_err(0, "si:N<=0");
+            cmd_err(0, "si: N<=0");
     }
     return 0;
 }
 
 static int cmd_info(char *args) {
-    /* extract the first argument */
-
+    /* extract the second token: the first argument */
     char *arg = strtok(NULL, " ");
     if (arg == NULL) {
         /* no argument given */
@@ -137,7 +142,7 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_p(char *args) {
-    /* extract the first argument */
+    /* extract the second token: the first argument */
     if (args == NULL) {
         /* no argument given */
         cmd_err(0, "p: no argument given\n");
@@ -151,36 +156,44 @@ static int cmd_p(char *args) {
 }
 
 static int cmd_x(char *args) {
-    /* extract the first argument */
+    /* extract the second token: the first argument */
     char *arg1 = strtok(NULL, " ");
     char *arg2 = strtok(NULL, " ");
     if (arg1 == NULL || arg2 == NULL) {
         /* no argument given */
-        cmd_err(1, "x");
-    } else {
-        int n = atoi(arg1);
-        if (n <= 0) {
-            cmd_err(0, "x:N<=0");
-        } else {
-            int addr;
-            sscanf(arg2, "%x", &addr);
-            for (int i = 0; i < n; i++, addr += 4) {
-                uint32_t data;
-                data = vaddr_read(addr, 4);
-                if ((i & 0x3) == 0)
-                    printf("0x%08x: ", addr);
-                printf("0x%08x%*s", data, 4, "");
-                if ((i & 0x3) == 0x3)
-                    printf("\n");
-            }
-            printf("\n");
-        }
+        cmd_err(1, "no argument given");
+        return 0;
     }
+
+    /* judge whether arg1 is digit */
+    if (strspn(arg, "0123456789") != strlen(arg)) {
+        cmd_err(0, "N: not digit");
+        return 0;
+    }
+
+    int n = atoi(arg1);
+    if (n <= 0) {
+        cmd_err(0, "x: N<=0");
+        return 0;
+    }
+
+    int addr;
+    sscanf(arg2, "%x", &addr);
+    for (int i = 0; i < n; i++, addr += 4) {
+        uint32_t data;
+        data = vaddr_read(addr, 4);
+        if ((i & 0x3) == 0)
+            printf("0x%08x: ", addr);
+        printf("0x%08x%*s", data, 4, "");
+        if ((i & 0x3) == 0x3)
+            printf("\n");
+    }
+    printf("\n");
     return 0;
 }
 
 static int cmd_w(char *args) {
-    /* extract the first argument */
+    /* extract the second token: the first argument */
 
     char *arg = strtok(NULL, " ");
     if (arg == NULL) {
@@ -195,7 +208,7 @@ static int cmd_w(char *args) {
 }
 
 static int cmd_d(char *args) {
-    /* extract the first argument */
+    /* extract the second token: the first argument */
 
     char *arg = strtok(NULL, " ");
     if (arg == NULL) {
