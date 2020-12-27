@@ -183,10 +183,12 @@ static int cmd_x(char *args) {
         uint32_t data;
         data = vaddr_read(addr, 4);
         if ((i & 0x3) == 0)
-            printf("0x%08x: ", addr);
-        printf("0x%08x%*s", data, 4, "");
+            printf("0x%08x: ", addr);       // %08x: 输出8位宽的十六进制数，前空位补0
+        printf("0x%08x", data);
         if ((i & 0x3) == 0x3)
             printf("\n");
+        else
+            printf("%4s", "");
     }
     printf("\n");
     return 0;
