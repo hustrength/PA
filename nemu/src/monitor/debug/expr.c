@@ -13,12 +13,12 @@ int get_main_op(int p, int q);
 uint32_t eval(int p, int q, bool *success);
 
 enum {
-    TK_NOTYPE = 256, TK_EQ, TK_UNEQ,
+    TK_NOTYPE = 256, TK_EQ,
 
     /* TODO: Add more token types */
     /* PA1.2*/
-    TK_DECI, TK_PLUS, TK_SUB, TK_MUL, TK_DIV,
-    TK_LBR, TK_RBR, TK_NUM, TK_HEX, TK_REG, TK_AND, TK_OR, TK_DEREF, TK_NEG
+    TK_UNEQ, TK_PLUS, TK_SUB, TK_MUL, TK_DIV,
+    TK_LBR, TK_RBR, TK_DECI, TK_HEX, TK_REG, TK_AND, TK_OR, TK_DEREF, TK_NEG
 };
 
 static struct rule {
@@ -43,7 +43,7 @@ static struct rule {
         {"\\*",                                                        TK_MUL,    2},       // multiply or derefrence
         {"/",                                                          TK_DIV,    2},       // divide
         {"0[Xx][0-9a-fA-F]+",                                          TK_HEX,    7},       // hex (must before the TK_DECI)
-        {"[0-9]+",                                                     TK_DECI,   7},       // number(dec)
+        {"[0-9]+",                                                     TK_DECI,   7},       // decimal
         {"\\(",                                                        TK_LBR,    0},       // left bracket
         {"\\)",                                                        TK_RBR,    0},       // right bracket
         {"\\$(E?[A-DS][XPI])|([A-D][HL])|(e?[a-ds][xpi])|([a-d][hl])", TK_REG,    7},       // register
@@ -128,7 +128,7 @@ static bool make_token(char *e) {
         }
 
         if (i == NR_REGEX) {
-            printf("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
+            Log("no match at position %d\n%s\n%*.s^\n", position, e, position, "");
             return false;
         }
     }
@@ -218,7 +218,7 @@ uint32_t eval(int p, int q, bool *success) {
          */
         uint32_t val = 0;
         int type = tokens[p].type;
-        if (type == TK_NUM || type == TK_HEX) {
+        if (type == TK_DECI || type == TK_HEX) {
             // 当 base 的值为 0 时，默认采用 10 进制转换，但如果遇到 '0x' / '0X' 前置字符则会使用 16 进制转换，遇到 '0' 前置字符则会使用 8 进制转换。
             return strtoul(tokens[p].str, NULL, 0);
         } else if (type == TK_REG) {
@@ -226,11 +226,11 @@ uint32_t eval(int p, int q, bool *success) {
             val = isa_reg_str2val(tokens[p].str + 1, success);
             if (*success)
                 return val;
-            printf("Unknown register: %s\n", tokens[p].str);
+            Log("Unknown register: %s\n", tokens[p].str);
             *success = false;
             return -1;
         }
-        printf("eval error: %s\n", tokens[p].str);
+        Log("eval error: %s\n", tokens[p].str);
         *success = false;
         return -1;
     } else if (check_parentheses(p, q, valid) == true) {
@@ -241,7 +241,7 @@ uint32_t eval(int p, int q, bool *success) {
     } else {
         /* TODO: We should do more things here. */
         if (!valid) {
-            printf("Error: the expression is invalid\n");
+            Log("Error: the expression is invalid\n");
             *success = false;
             return -1;
         }
@@ -273,7 +273,7 @@ uint32_t eval(int p, int q, bool *success) {
                 break;
             case TK_DIV:
                 if (val2 == 0) {
-                    printf("Error: Divide 0 at [%d, %d]", p, q);
+                    Log("Error: Divide 0 at [%d, %d]", p, q);
                     *success = false;
                     return -1;
                 }
@@ -298,7 +298,7 @@ uint32_t eval(int p, int q, bool *success) {
                 val = -val2;
                 break;
             default:
-                printf("Error: Unknown token type %d: %d %d\n", pos, tokens[pos].type, TK_PLUS);
+                Log("Error: Unknown token type %d: %d %d\n", pos, tokens[pos].type, TK_PLUS);
                 *success = false;
                 return -1;
         }
