@@ -6,6 +6,10 @@
 #include <sys/types.h>
 #include <regex.h>
 
+bool check_parentheses(int p, int q, bool *valid);
+
+int get_main_op(int p, int q);
+
 uint32_t eval(int p, int q, bool *success);
 
 enum {
@@ -141,7 +145,7 @@ uint32_t expr(char *e, bool *success) {
     /* TODO: Insert codes to evaluate the expression. */
     /* PA1.2 */
 
-    /* Judge whether the token is NEG or DEREF */
+    /* Judge whether the token is TK_NEG or TK_DEREF */
     for (int i = 0; i < nr_token; i++) {
         if (tokens[i].type == TK_MUL &&
             (i == 0 || (tokens[i - 1].priority != 7 && tokens[i - 1].type != TK_RBR))) {
@@ -157,6 +161,146 @@ uint32_t expr(char *e, bool *success) {
     return eval(0, nr_token - 1);
 }
 
-uint32_t eval(int p, int q) {
+/*
+ * int check_parentheses(int p, int q)
+ * return 1  if the parentheses is a valid expression with left and right bracket.
+ * return 0  if the parentheses is a valid expression but without left and right bracket.
+ * return -1 if the parenteses isn't a valid expression.
+ */
+bool check_parentheses(int p, int q, bool *valid) {
+    *valid = false;
+    if (tokens[p].type != TK_LBR || tokens[q].type != TK_RBR)
+        return false;  // without left or right bracket
 
+    int nump = 0;
+    /* flag means if the left and right brackets are the type of the expression like (exp)+(exp) */
+    bool flag = false;
+    for (int i = p + 1; i <= q - 1; ++i) {
+        if (tokens[i].type == TK_LBR) {
+            nump++;
+        } else if (tokens[i].type == TK_RBR) {
+            nump--;
+            if (nump < 0)
+                flag = true;
+        }
+    }
+    *valid = (nump == 0);
+    return *valid && !flag;
+}
+
+/* return -1 if there is no main operator */
+int get_main_op(int p, int q) {
+    int inBracket = 0, pos = -1, main_op_priority = 0;
+    int type;
+    for (int i = p; i <= q; i++) {
+        type = tokens[i].type;
+        if (!inBracket && tokens[i].priority > 0 && tokens[i].priority < 7) {
+            if (tokens[i].priority >= main_op_priority) {
+                pos = i;
+                main_op_priority = tokens[i].priority;
+            }
+        } else if (type == TK_LBR) inBracket++;
+        else if (type == TK_RBR) inBracket--;
+    }
+    return pos;
+}
+
+uint32_t eval(int p, int q, bool *success) {
+    *success = true;
+    bool *valid;
+    if (p > q) {
+        /* Bad expression */
+        *success = false;
+        return -1;
+    } else if (p == q) {
+        /* Single token.
+         * For now this token should be a number.
+         * Return the value of the number.
+         */
+        uint32_t val = 0;
+        int type = tokens[p].type;
+        if (type == TK_NUM || type == TK_HEX) {
+            // 当 base 的值为 0 时，默认采用 10 进制转换，但如果遇到 '0x' / '0X' 前置字符则会使用 16 进制转换，遇到 '0' 前置字符则会使用 8 进制转换。
+            return strtoul(tokens[p].str, NULL, 0);
+        } else if (type == TK_REG) {
+            bool *success;
+            val = isa_reg_str2val(tokens[p].str + 1, success);
+            if (*success)
+                return val;
+            printf("Unknown register: %s\n", tokens[p].str);
+            *success = false;
+            return -1;
+        }
+        printf("eval error: %s\n", tokens[p].str);
+        *success = false;
+        return -1;
+    } else if (check_parentheses(p, q, valid) == true) {
+        /* The expression is surrounded by a matched pair of parentheses.
+         * If that is the case, just throw away the parentheses.
+         */
+        return eval(p + 1, q - 1);
+    } else {
+        /* TODO: We should do more things here. */
+        if (!valid) {
+            printf("Error: the expression is invalid\n");
+            *success = false;
+            return -1;
+        }
+        int pos = get_main_op(p, q);
+        if (pos == -1) {
+            *success = false;
+            return -1;
+        }
+        uint32_t val1 = 0, val2 = 0, val = 0;
+        if (tokens[pos].type != TK_DEREF && tokens[pos].type != TK_NEG) {
+            val1 = eval(p, pos - 1, success);
+            if (*success == false)
+                return -1;
+        }
+
+        val2 = eval(pos + 1, q, success);
+        if (*success == false)
+            return -1;
+
+        switch (tokens[pos].type) {
+            case TK_PLUS:
+                val = val1 + val2;
+                break;
+            case TK_SUB:
+                val = val1 - val2;
+                break;
+            case TK_MUL:
+                val = val1 * val2;
+                break;
+            case TK_DIV:
+                if (val2 == 0) {
+                    printf("Error: Divide 0 at [%d, %d]", p, q);
+                    *success = false;
+                    return -1;
+                }
+                val = val1 / val2;
+                break;
+            case TK_AND:
+                val = val1 && val2;
+                break;
+            case TK_OR:
+                val = val1 || val2;
+                break;
+            case TK_EQ:
+                val = val1 == val2;
+                break;
+            case TK_DEREF:
+                val = vaddr_read(val2, 4);
+                break;
+            case TK_NEG:
+                val = -val2;
+                break;
+            default:
+                printf("Error: Unknown token type %d: %d %d\n", pos, tokens[pos].type, TK_PLUS);
+                *success = false;
+                return -1;
+        }
+        *success = true;
+        return val;
+    }
 }
