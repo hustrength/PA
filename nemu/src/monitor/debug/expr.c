@@ -13,12 +13,12 @@ int get_main_op(int p, int q);
 uint32_t eval(int p, int q, bool *success);
 
 enum {
-    TK_NOTYPE = 256, TK_EQ, TK_UNEQ
+    TK_NOTYPE = 256, TK_EQ, TK_UNEQ,
 
     /* TODO: Add more token types */
     /* PA1.2*/
     TK_DECI, TK_PLUS, TK_SUB, TK_MUL, TK_DIV,
-    TK_LBR, TK_RBR, TK_HEX, TK_REG, TK_AND, TK_OR, TK_DEREF, TK_NEG
+    TK_LBR, TK_RBR, TK_NUM, TK_HEX, TK_REG, TK_AND, TK_OR, TK_DEREF, TK_NEG
 };
 
 static struct rule {
@@ -158,7 +158,7 @@ uint32_t expr(char *e, bool *success) {
         }
     }
     *success = true;
-    return eval(0, nr_token - 1);
+    return eval(0, nr_token - 1, success);
 }
 
 /*
@@ -206,7 +206,6 @@ int get_main_op(int p, int q) {
 }
 
 uint32_t eval(int p, int q, bool *success) {
-    *success = true;
     bool *valid;
     if (p > q) {
         /* Bad expression */
@@ -238,7 +237,7 @@ uint32_t eval(int p, int q, bool *success) {
         /* The expression is surrounded by a matched pair of parentheses.
          * If that is the case, just throw away the parentheses.
          */
-        return eval(p + 1, q - 1);
+        return eval(p + 1, q - 1, success);
     } else {
         /* TODO: We should do more things here. */
         if (!valid) {
@@ -288,6 +287,9 @@ uint32_t eval(int p, int q, bool *success) {
                 break;
             case TK_EQ:
                 val = val1 == val2;
+                break;
+            case TK_UNEQ:
+                val = val1 != val2;
                 break;
             case TK_DEREF:
                 val = vaddr_read(val2, 4);

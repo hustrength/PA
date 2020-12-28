@@ -166,7 +166,7 @@ static int cmd_x(char *args) {
     }
 
     /* judge whether arg1 is digit */
-    if (strspn(arg, "0123456789") != strlen(arg)) {
+    if (strspn(arg1, "0123456789") != strlen(arg1)) {
         cmd_err(0, "N: not digit");
         return 0;
     }
@@ -197,15 +197,15 @@ static int cmd_x(char *args) {
 static int cmd_w(char *args) {
     /* extract the second token: the first argument */
 
-    char *arg = strtok(NULL, " ");
+    /*char *arg = strtok(NULL, " ");
     if (arg == NULL) {
-        /* no argument given */
+        *//* no argument given *//*
         cmd_err(1, "w\n");
     } else {
         WP *p = new_wp(arg);
         printf("watchpoint %d : %s\n", p->NO, p->expr);
     }
-    return 0;
+    return 0;*/
 
 }
 
