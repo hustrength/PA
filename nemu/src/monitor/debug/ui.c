@@ -135,7 +135,7 @@ static int cmd_info(char *args) {
         cmd_err(0, "info: no argument given\n");
     } else {
         if (*arg == 'r') isa_reg_display();
-//        else if (*arg == 'w') display_wp();
+        else if (*arg == 'w') display_wp();
         else cmd_err(0, "info: unknown argument");
     }
     return 0;
@@ -196,16 +196,16 @@ static int cmd_x(char *args) {
 
 static int cmd_w(char *args) {
     /* extract the second token: the first argument */
-
-//    char *arg = strtok(NULL, " ");
-//    if (arg == NULL) {
-//         no argument given
-//        cmd_err(1, "w\n");
-//    } else {
-//        WP *p = new_wp(arg);
-//        printf("watchpoint %d : %s\n", p->NO, p->expr);
-//    }
-//    return 0;
+    /* PA1.3 */
+    char *arg = strtok(NULL, " ");
+    if (arg == NULL) {
+         no argument given
+        cmd_err(1, "w\n");
+    } else {
+        WP *p = new_wp(arg);
+        printf("watchpoint %d : %s\n", p->NO, p->expr);
+    }
+    return 0;
 
 }
 
@@ -221,7 +221,7 @@ static int cmd_d(char *args) {
         if (n < 0) {
             cmd_err(0, "d:N must be in [0,31] \n");
         }
-//        del_wp(n);
+        del_wp(n);
     }
     return 0;
 }
