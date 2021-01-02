@@ -7,7 +7,7 @@
 
 // this should be enough
 #define N_TOKEN 10
-static char buf[5000];      // code_buf includes buf, so code_buf should be longer than buf.
+static char buf[32768];      // code_buf includes buf, so code_buf should be longer than buf.
 
 static uint32_t choose(uint32_t n) {
     return rand() % n;

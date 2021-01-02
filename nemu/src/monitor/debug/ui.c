@@ -199,7 +199,7 @@ static int cmd_w(char *args) {
     /* PA1.3 */
     char *arg = strtok(NULL, " ");
     if (arg == NULL) {
-         no argument given
+        /* no argument given */
         cmd_err(1, "w\n");
     } else {
         WP *p = new_wp(arg);
