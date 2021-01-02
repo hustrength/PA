@@ -5,7 +5,7 @@
 #include "monitor/diff-test.h"
 #include "rtl/rtl.h"
 
-#define make_EHelper(name) void concat(exec_, name) (vaddr_t *pc)
+#define make_EHelper(name) void concat(exec_, name) (vaddr_t *pc)   // MACRO concat is in rtl/rtl.h
 typedef void (*EHelper) (vaddr_t *);
 
 #include "cpu/decode.h"
