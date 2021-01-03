@@ -8,7 +8,8 @@
 #include <am.h>
 #include <stdarg.h>
 
-//#define __NATIVE_USE_KLIB__
+/* The following MACRO only works when ARCH=native */
+#define __NATIVE_USE_KLIB__     // define this MACRO when testing if libs are correct
 
 #ifdef __NATIVE_USE_KLIB__
 #define strlen my_strlen
