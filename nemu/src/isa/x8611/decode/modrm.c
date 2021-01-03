@@ -83,7 +83,7 @@ void read_ModR_M(vaddr_t *pc, Operand *rm, bool load_rm_val, Operand *reg, bool 
   decinfo.isa.ext_opcode = m.opcode;
   if (reg != NULL) {
     reg->type = OP_TYPE_REG;
-    reg->reg = m.reg;
+    reg->reg = m.reg;       // 存入寄存器编号
     if (load_reg_val) {
       rtl_lr(&reg->val, reg->reg, reg->width);
     }
@@ -92,10 +92,10 @@ void read_ModR_M(vaddr_t *pc, Operand *rm, bool load_rm_val, Operand *reg, bool 
     snprintf(reg->str, OP_STR_SIZE, "%%%s", reg_name(reg->reg, reg->width));
 #endif
   }
-
+  /* 当mod域取值为3的时候, r/m表示的是寄存器; 否则r/m表示的是内存 */
   if (m.mod == 3) {
     rm->type = OP_TYPE_REG;
-    rm->reg = m.R_M;
+    rm->reg = m.R_M;        // 存入寄存器编号
     if (load_rm_val) {
       rtl_lr(&rm->val, m.R_M, rm->width);
     }
