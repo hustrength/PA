@@ -10,6 +10,8 @@
  * E:寄存器/内存
  * b:字节
  * v:word\double word\quadword(16/32/64位,取决于CPU模式)
+ * S：有符号
+ * I：立即数
  * */
 
 /* Ib, Iv */
