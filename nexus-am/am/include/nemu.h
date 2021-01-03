@@ -3,6 +3,11 @@
 
 #include ISA_H // "x86.h", "mips32.h", ...
 
+
+/*
+ * 当要求使用volatile声明变量值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。
+ * 精确地说，遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，从而可以提供对特殊地址的稳定访问。
+ * */
 #if defined(__ISA_X86__)
 # define nemu_trap(code) asm volatile (".byte 0xd6" : :"a"(code))
 #elif defined(__ISA_MIPS32__)
