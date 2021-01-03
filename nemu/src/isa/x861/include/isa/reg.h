@@ -17,36 +17,44 @@ enum { R_AL, R_CL, R_DL, R_BL, R_AH, R_CH, R_DH, R_BH };
  */
 
 typedef struct {
-    union {
-        union {
+    union{
+        union{
             uint32_t _32;
             uint16_t _16;
             uint8_t _8[2];
         } gpr[8];
-        /* Do NOT change the order of the GPRs' definitions. */
-
-        /* In NEMU, rtlreg_t is exactly uint32_t. This makes RTL instructions
-         * in PA2 able to directly access these registers.
-         */
-        struct {
+        struct{
             rtlreg_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
         };
     };
-    vaddr_t pc;
-    /* PA2.1 */
-    union{
-        struct{
-            uint32_t CF:1;      // 结构体位域设置为1字节
-            uint32_t :5;        // 无位域名不可使用，只进行填充
-            uint32_t ZF:1;
-            uint32_t SF:1;
-            uint32_t :1;
-            uint32_t IF:1;
-            uint32_t :1;
-            uint32_t OF:1;
-        }eflags;
-        uint32_t eflags_value;
-    };
+  /* Do NOT change the order of the GPRs' definitions. */
+
+  /* In NEMU, rtlreg_t is exactly uint32_t. This makes RTL instructions
+   * in PA2 able to directly access these registers.
+   */
+  vaddr_t pc;
+  /* PA2.1 */
+  union{
+	  struct{
+		  uint32_t CF:1;
+		  uint32_t :5;
+		  uint32_t ZF:1;
+		  uint32_t SF:1;
+		  uint32_t :1;
+		  uint32_t IF:1;
+		  uint32_t :1;
+		  uint32_t OF:1;
+	  }eflags;
+	  uint32_t eflags_value;
+  };
+  /* PA3 */
+  struct{
+    uint16_t limit;
+    uint32_t base;
+  }idtr;
+
+  rtlreg_t cs;
+
 } CPU_state;
 
 static inline int check_reg_index(int index) {

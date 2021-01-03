@@ -34,7 +34,7 @@ typedef union {
 } SIB;
 
 void load_addr(vaddr_t *, ModR_M *, Operand *);
-void read_ModR_M(vaddr_t *, Operand *, bool, Operand *, bool);  // in modrm.c
+void read_ModR_M(vaddr_t *, Operand *, bool, Operand *, bool);
 
 make_DHelper(I2E);
 make_DHelper(I2a);
