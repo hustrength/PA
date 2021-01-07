@@ -1,5 +1,5 @@
 #include "cpu/exec.h"
-/* PA2 */
+/* PA 2 */
 make_EHelper(mov) {
         operand_write(id_dest, &id_src->val);
         print_asm_template2(mov);
@@ -18,6 +18,7 @@ make_EHelper(pop) {
         print_asm_template1(pop);
 }
 
+/* PA 3.1 */
 make_EHelper(pusha) {
 
         s0 = reg_l(R_ESP);
@@ -33,6 +34,7 @@ make_EHelper(pusha) {
         print_asm("pusha");
 }
 
+/* PA 3.1 */
 make_EHelper(popa) {
 
         rtl_pop(&cpu.edi);

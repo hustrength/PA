@@ -47,6 +47,15 @@ typedef struct {
         }eflags;
         uint32_t eflags_value;
     };
+    /* PA 3.1 */
+    struct{
+        uint16_t limit;
+        uint32_t base;
+    }idtr;
+
+    /* PA 3.1 */
+    rtlreg_t cs;
+
 } CPU_state;
 
 static inline int check_reg_index(int index) {
