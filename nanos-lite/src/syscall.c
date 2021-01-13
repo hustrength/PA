@@ -16,6 +16,7 @@ _Context *do_syscall(_Context *c) {
         case SYS_yield:
             result = sys_yield();
             break;
+            /* PA 3.3 */
         case SYS_open:
             result = fs_open((char *) a[1], a[2], a[3]);
             break;

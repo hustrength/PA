@@ -9,6 +9,8 @@ ifeq ($(ARCH),native)
 ISA = am_native
 endif
 
+HAS_NAVY = 1
+
 FSIMG_PATH = $(NAVY_HOME)/fsimg
 RAMDISK_FILE = build/ramdisk.img
 

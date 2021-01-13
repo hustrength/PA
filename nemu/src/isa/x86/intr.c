@@ -1,11 +1,14 @@
 #include "rtl/rtl.h"
+/* PA 3.1 */
+#include "cpu/exec.h"
+#include "isa/mmu.h"
 
 void raise_intr(uint32_t NO, vaddr_t ret_addr) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * That is, use ``NO'' to index the IDT.
    */
 
-    /* PA3.1 */
+    /* PA 3.1 */
 
     vaddr_t idt_addr = cpu.idtr.base + sizeof(GateDesc)*NO;
     vaddr_t low_addr = vaddr_read(idt_addr,2) & 0xffff;
