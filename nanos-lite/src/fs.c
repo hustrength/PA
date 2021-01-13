@@ -18,11 +18,11 @@ size_t fbsync_write(const void *buf, size_t offset, size_t len);
 typedef struct {
     char *name;
     size_t size;
+    size_t disk_offset;
 
     /* PA 3.3 */
     size_t open_offset;
 
-    size_t disk_offset;
     ReadFn read;
     WriteFn write;
 } Finfo;
@@ -43,10 +43,10 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
 
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
-        {"stdin", 0, 0, invalid_read, invalid_write},
-        {"stdout", 0, 0, invalid_read, invalid_write},
-        {"stderr", 0, 0, invalid_read, invalid_write},
         /* PA 3.3 */
+        {"stdin", 0, 0, 0, invalid_read, invalid_write},
+        {"stdout", 0, 0, 0, invalid_read, serial_write},
+        {"stderr", 0, 0, 0, invalid_read, serial_write},
         {"/dev/fb", 0, 0, 0, invalid_read, fb_write},
         {"/dev/events", 0, 0, 0, events_read, invalid_write},
         {"/dev/fbsync", 0, 0, 0, invalid_read, fbsync_write},
@@ -81,9 +81,10 @@ size_t fs_read(int fd, void *buf, size_t len) {
     assert(fd >= 0 && fd < NR_FILES);
 
     int r_len = len;
-    if (file_table[fd].size > 0 && file_table[fd].open_offset + len > file_table[fd].size) {
+    if (file_table[fd].size > 0 \
+ && file_table[fd].open_offset + len > file_table[fd].size)
         r_len = file_table[fd].size - file_table[fd].open_offset;
-    }
+
     assert(r_len >= 0);
 
     size_t length = 0;
@@ -106,7 +107,8 @@ size_t fs_write(int fd, const void *buf, size_t len) {
     assert(fd >= 0 && fd < NR_FILES);
 
     int w_len = len;
-    if (file_table[fd].size > 0 && file_table[fd].open_offset + len > file_table[fd].size)
+    if (file_table[fd].size > 0 \
+ && file_table[fd].open_offset + len > file_table[fd].size)
         w_len = file_table[fd].size - file_table[fd].open_offset;
 
 
