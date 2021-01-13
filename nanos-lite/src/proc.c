@@ -25,6 +25,8 @@ void init_proc() {
   Log("Initializing processes...");
 
   // load program here
+  /* PA 3.2 */
+    naive_uload(NULL, "/bin/init");
 
 }
 

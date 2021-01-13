@@ -10,8 +10,29 @@
 #endif
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  TODO();
-  return 0;
+    /* PA 3.2 */
+    Elf_Ehdr elfheader;
+    Elf_Phdr programheader;
+    int fd = fs_open(filename,0,0);
+    assert(fd!=-1);
+    fs_read(fd,&elfheader,sizeof(Elf_Ehdr));
+    fs_lseek(fd,elfheader.e_phoff,SEEK_SET);
+    size_t open_offset;
+
+    for (uint16_t i=0; i<elfheader.e_phnum; i++){
+
+        fs_read(fd,&programheader,sizeof(Elf_Phdr));
+        open_offset = fs_open_offset(fd);
+        if(programheader.p_type == PT_LOAD){
+            fs_lseek(fd,programheader.p_offset,SEEK_SET);
+            fs_read(fd,(void *)programheader.p_vaddr,programheader.p_filesz);
+            memset((void*)(programheader.p_vaddr+programheader.p_filesz),0,(programheader.p_memsz-programheader.p_filesz));
+        }
+        fs_lseek(fd,open_offset,SEEK_SET);
+
+    }
+    fs_close(fd);
+    return elfheader.e_entry;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
