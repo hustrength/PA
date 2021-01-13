@@ -16,29 +16,33 @@
 static uintptr_t loader(PCB *pcb, const char *filename) {
     /* PA 3.2 */
     /* PA 3.3 */
-    Elf_Ehdr elfheader;
-    Elf_Phdr programheader;
+    Elf_Ehdr elf_header;
+    Elf_Phdr program_header;
     int fd = fs_open(filename, 0, 0);
+    if (fd == -1)
+        printf("file %s does not exist!", filename);
     assert(fd != -1);
-    fs_read(fd, &elfheader, sizeof(Elf_Ehdr));
-    fs_lseek(fd, elfheader.e_phoff, SEEK_SET);
+    
+    fs_read(fd, &elf_header, sizeof(Elf_Ehdr));
+    fs_lseek(fd, elf_header.e_phoff, SEEK_SET);
+    
     size_t open_offset;
 
-    for (uint16_t i = 0; i < elfheader.e_phnum; i++) {
+    for (uint16_t i = 0; i < elf_header.e_phnum; i++) {
 
-        fs_read(fd, &programheader, sizeof(Elf_Phdr));
+        fs_read(fd, &program_header, sizeof(Elf_Phdr));
         open_offset = fs_open_offset(fd);
-        if (programheader.p_type == PT_LOAD) {
-            fs_lseek(fd, programheader.p_offset, SEEK_SET);
-            fs_read(fd, (void *) programheader.p_vaddr, programheader.p_filesz);
-            memset((void *) (programheader.p_vaddr + programheader.p_filesz), 0,
-                   (programheader.p_memsz - programheader.p_filesz));
+        if (program_header.p_type == PT_LOAD) {
+            fs_lseek(fd, program_header.p_offset, SEEK_SET);
+            fs_read(fd, (void *) program_header.p_vaddr, program_header.p_filesz);
+            memset((void *) (program_header.p_vaddr + program_header.p_filesz), 0, \
+                   (program_header.p_memsz - program_header.p_filesz));
         }
         fs_lseek(fd, open_offset, SEEK_SET);
 
     }
     fs_close(fd);
-    return elfheader.e_entry;
+    return elf_header.e_entry;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {

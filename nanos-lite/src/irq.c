@@ -2,13 +2,17 @@
 
 static _Context *do_event(_Event e, _Context *c) {
     switch (e.event) {
-        /* PA 3.1 */
+            /* PA 3.1 */
         case _EVENT_YIELD:
             Log("Event yield");
             break;
-        /* PA 3.2 */
+            /* PA 3.2 */
         case _EVENT_SYSCALL:
             return do_syscall(c);
+            break;
+            /* PA 3.3 */
+        case _EVENT_IRQ_TIMER:
+            Log("receive intr");
             break;
         default:
             panic("Unhandled event ID = %d", e.event);
