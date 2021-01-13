@@ -33,7 +33,25 @@ static int cmd_c(char *args);
 
 static int cmd_q(char *args);
 
-/* PA1 */
+/* PA 3.3 */
+static int cmd_detach(char *args);
+
+static int cmd_attach(char *args);
+
+static int cmd_save(char *args);
+
+static int cmd_load(char *args);
+
+void difftest_detach();
+
+void difftest_attach();
+
+bool isa_save(const FILE *fp);
+
+bool isa_load(FILE *fp);
+
+
+/* PA 1 */
 static void cmd_err(int err_type, const char *command);
 
 static int cmd_si(char *args);
@@ -54,21 +72,26 @@ static struct {
 
     int (*handler)(char *);
 } cmd_table[] = {
-        {"help", "Display informations about all supported commands",                                                              cmd_help},
-        {"c",    "Continue the execution of the program",                                                                          cmd_c},
-        {"q",    "Exit NEMU",                                                                                                      cmd_q},
+        {"help",   "Display informations about all supported commands",                                                              cmd_help},
+        {"c",      "Continue the execution of the program",                                                                          cmd_c},
+        {"q",      "Exit NEMU",                                                                                                      cmd_q},
 
         /* TODO: Add more commands */
         /* PA1.1 */
-        {"si",   "Usage: si [N]\n Execute the program with N(default: 1) step",                                                    cmd_si},
-        {"info", "Usage: info [rw]\n"\
+        {"si",     "Usage: si [N]\n Execute the program with N(default: 1) step",                                                    cmd_si},
+        {"info",   "Usage: info [rw]\n"\
   "info r: print the values of all registers\n"\
   "info w: show information about watchpoint", cmd_info},
-        {"x",    "Usage: x [N] [EXPR]\n" \
+        {"x",      "Usage: x [N] [EXPR]\n" \
     "print N(default:1) consecutive 4 bytes starting from address calculated from EXPR",  cmd_x},
-        {"p",    "Usage: p EXPR\nPrint the value of expression",                                                                   cmd_p},
-        {"w",    "Usage: w EXPR\nAdd watchpoint",                                                                                  cmd_w},
-        {"d",    "Usage: d N\nDelete No N watchpoint",                                                                             cmd_d}
+        {"p",      "Usage: p EXPR\nPrint the value of expression",                                                                   cmd_p},
+        {"w",      "Usage: w EXPR\nAdd watchpoint",                                                                                  cmd_w},
+        {"d",      "Usage: d N\nDelete No N watchpoint",                                                                             cmd_d},
+        /* PA 3.3 */
+        {"detach", "Usage:detach \nQuit Diff-Test mode",                                                                             cmd_detach},
+        {"attach", "Usage:attach \nOpen Diff-Test mode",                                                                             cmd_attach},
+        {"save",   "Usage:save [path] \nSave current state to path",                                                                 cmd_save},
+        {"load",   "Usage:load [path] \nLoad state from path",                                                                       cmd_load}
 };
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
@@ -238,6 +261,54 @@ static void cmd_err(int err_type, const char *command) {
             printf("Unknown error\n");
             break;
     }
+}
+
+/* PA 3.3 */
+static int cmd_detach(char *args) {
+    difftest_detach();
+    return 0;
+}
+
+static int cmd_attach(char *args) {
+    difftest_attach();
+    return 0;
+}
+
+static int cmd_save(char *args) {
+    if (args == NULL) {
+        printf("please input parameter [path].\n");
+    } else {
+        FILE *fp = fopen(args, "w");
+        if (fp == NULL) {
+            printf("file %s failed to open.\n", args);
+        } else if (isa_save(fp) != true) {
+            printf("file %s failed to save.\n", args);
+            fclose(fp);
+        } else {
+            printf("save at : %s\n", args);
+            fclose(fp);
+        }
+    }
+    return 0;
+}
+
+static int cmd_load(char *args) {
+    if (args == NULL) {
+        printf("please input parameter [path].\n");
+    } else {
+        FILE *fp = fopen(args, "r");
+        if (fp == NULL) {
+            printf("file %s failed to open.\n", args);
+        } else if (isa_load(fp) != true) {
+            printf("file %s failed to load.\n", args);
+            fclose(fp);
+        } else {
+            printf("load from : %s\n", args);
+            fclose(fp);
+            difftest_attach();
+        }
+    }
+    return 0;
 }
 
 void ui_mainloop(int is_batch_mode) {

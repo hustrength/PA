@@ -26,7 +26,7 @@ void init_proc() {
 
   // load program
   /* PA 3.2 */
-    naive_uload(NULL, "/bin/events");
+    naive_uload(NULL, "/bin/pal");
 
 }
 
