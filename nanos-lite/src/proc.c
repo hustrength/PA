@@ -27,7 +27,6 @@ void init_proc() {
   // load program
   /* PA 3.2 */
     naive_uload(NULL, "/bin/init");
-
 }
 
 _Context* schedule(_Context *prev) {
